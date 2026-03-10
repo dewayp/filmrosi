@@ -110,8 +110,6 @@ const DetailPage = (() => {
         <div class="detail-body">
           ${genre ? `<div class="genre-list" style="margin-bottom:var(--space-md);">${Utils.genreTags(genre)}</div>` : ''}
 
-          ${description ? `<p class="detail-description">${description}</p>` : ''}
-
           <!-- Action Buttons -->
           <div class="detail-actions">
             ${isMovie ? `
@@ -130,6 +128,8 @@ const DetailPage = (() => {
             `}
           </div>
 
+          ${description ? `<p class="detail-description">${description}</p>` : ''}
+
           <!-- Episode Selector (for series) -->
           ${isSeries ? EpisodeList.createHTML(TOTAL_SEASONS, currentSeasonEpisodes, activeSeason, activeEpisode, false) : ''}
         </div>
@@ -147,11 +147,11 @@ const DetailPage = (() => {
       console.error('Detail error:', err);
       const page = document.getElementById('detail-page');
       if (page) page.innerHTML = `
-        <div class="error-state" style="padding-top:120px;">
-          <div style="font-size:48px;">😕</div>
-          <p style="font-weight:700;margin-bottom:8px;">Gagal Memuat Detail</p>
-          <p>${err.message}</p>
-          <button class="btn btn-primary" style="margin-top:16px;" onclick="Router.back()">Kembali</button>
+        <div class="error-state" style="padding-top:120px; padding-inline: 20px; text-align: center;">
+          <div style="font-size:48px; margin-bottom: 16px;">😕</div>
+          <p style="font-weight:700; font-size: 18px; line-height: 1.4; margin-bottom:8px;">Maaf, film ini sementara tidak bisa ditonton, coba nonton film lain dulu ya</p>
+          <p style="font-size: 13px; opacity: 0.6; margin-bottom: 24px;">Error: ${err.message}</p>
+          <button class="btn btn-primary" style="padding: 12px 24px;" onclick="Router.back()">Kembali</button>
         </div>
       `;
       Utils.showToast('Gagal memuat detail konten', 'error');
@@ -167,7 +167,7 @@ const DetailPage = (() => {
       await loadAndPlay(currentSubject.subjectId, currentSubject.subjectType, currentSubject.title, 0, 0);
     } catch (err) {
       if (btn) { btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg> Tonton`; btn.disabled = false; }
-      Utils.showToast('Gagal mendapatkan link streaming: ' + err.message, 'error');
+      showPlayError(err);
     }
   }
 
@@ -196,7 +196,7 @@ const DetailPage = (() => {
         btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg> Tonton S${season}E${episode}`;
         btn.disabled = false;
       }
-      Utils.showToast('Gagal memuat episode: ' + err.message, 'error');
+      showPlayError(err);
     }
   }
 
@@ -238,6 +238,21 @@ const DetailPage = (() => {
     });
 
     Router.navigate('/player');
+  }
+
+  function showPlayError(err) {
+    const page = document.getElementById('detail-page');
+    if (page) {
+      page.innerHTML = `
+        <div class="error-state" style="padding-top:120px; padding-inline: 20px; text-align: center;">
+          <div style="font-size:48px; margin-bottom: 16px;">😕</div>
+          <p style="font-weight:700; font-size: 18px; line-height: 1.4; margin-bottom:8px;">Maaf, film ini sementara tidak bisa ditonton, coba nonton film lain dulu ya</p>
+          <p style="font-size: 13px; opacity: 0.6; margin-bottom: 24px;">Error: ${err.message}</p>
+          <button class="btn btn-primary" style="padding: 12px 24px;" onclick="Router.back()">Kembali</button>
+        </div>
+      `;
+    }
+    Utils.showToast('Gagal memutar video', 'error');
   }
 
   function changeSeason(season) {
