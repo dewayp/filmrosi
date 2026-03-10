@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Offline — MOVIEBOX ROSI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .offline-content {
+            text-align: center;
+            padding: var(--space-xl);
+            max-width: 360px;
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: var(--space-lg);
+        }
+
+        .offline-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 800;
+            margin-bottom: var(--space-sm);
+        }
+
+        .offline-text {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: var(--space-xl);
+        }
+
+        .offline-logo {
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin-bottom: var(--space-2xl);
+        }
+
+        .offline-logo span {
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="offline-content">
+        <div class="offline-logo">MOVIE<span>BOX</span> ROSI</div>
+        <div class="offline-icon">📡</div>
+        <h1 class="offline-title">Tidak Ada Koneksi</h1>
+        <p class="offline-text">Sepertinya kamu sedang offline. Periksa koneksi internet dan coba lagi.</p>
+        <button class="btn btn-primary btn-lg" onclick="window.location.reload()">
+            Coba Lagi
+        </button>
+    </div>
+</body>
+
+</html>

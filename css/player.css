@@ -1,0 +1,511 @@
+/* =============================================
+   MOVIEBOX ROSI — Video Player CSS
+   ============================================= */
+
+/* ===== PLAYER PAGE ===== */
+.player-page {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== VIDEO WRAPPER ===== */
+.player-video-wrap {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* ===== CONTROLS OVERLAY ===== */
+.player-controls-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+    z-index: 10;
+}
+
+.player-controls-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Top bar */
+.player-top-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: calc(var(--safe-top) + 12px) 16px 16px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent);
+}
+
+.player-back-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--transition-fast);
+}
+
+.player-back-btn:active {
+    background: rgba(229, 9, 20, 0.5);
+}
+
+.player-back-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+.player-title-block {
+    flex: 1;
+    overflow: hidden;
+}
+
+.player-title {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+.player-episode-label {
+    font-size: var(--font-size-xs);
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 2px;
+}
+
+/* Center controls */
+.player-center-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    flex: 1;
+}
+
+.player-ctrl-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.player-ctrl-btn:active {
+    transform: scale(0.9);
+}
+
+.player-ctrl-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+}
+
+.player-ctrl-btn.play-pause-btn {
+    width: 64px;
+    height: 64px;
+    background: var(--accent);
+    box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5);
+}
+
+.player-ctrl-btn.play-pause-btn svg {
+    width: 28px;
+    height: 28px;
+}
+
+.player-ctrl-btn.play-pause-btn:hover {
+    background: var(--accent-dark);
+}
+
+/* Bottom bar */
+.player-bottom-bar {
+    padding: 16px;
+    padding-bottom: calc(var(--safe-bottom) + 16px);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+}
+
+/* Seek bar */
+.player-seek-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.player-time {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    min-width: 40px;
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+
+.player-seek {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: height var(--transition-fast);
+}
+
+.player-seek:hover {
+    height: 6px;
+}
+
+.player-seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(229, 9, 20, 0.6);
+    transition: transform var(--transition-fast);
+}
+
+.player-seek::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.player-seek::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px rgba(229, 9, 20, 0.6);
+}
+
+/* Bottom controls row */
+.player-controls-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.player-vol-btn,
+.player-speed-btn,
+.player-fullscreen-btn,
+.player-ep-btn {
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.1);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.player-vol-btn:active,
+.player-speed-btn:active,
+.player-fullscreen-btn:active,
+.player-ep-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.player-vol-btn svg,
+.player-speed-btn svg,
+.player-cc-btn svg,
+.player-qty-btn svg,
+.player-fullscreen-btn svg,
+.player-ep-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: white;
+}
+
+/* Episode nav (series) */
+.player-ep-nav {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.player-ep-nav-btn {
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.12);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background var(--transition-fast);
+}
+
+.player-ep-nav-btn:active {
+    background: var(--accent);
+}
+
+.player-ep-nav-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: white;
+}
+
+.player-ep-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Popup Menus (Speed, CC, Quality) */
+.player-popup {
+    position: absolute;
+    bottom: 80px;
+    right: 16px;
+    background: rgba(20, 20, 30, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    z-index: 20;
+    display: none;
+    min-width: 140px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.player-popup.visible {
+    display: block;
+    animation: popup-up 0.2s ease;
+}
+
+@keyframes popup-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.popup-title {
+    padding: 10px 16px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(15, 15, 20, 0.95);
+    z-index: 2;
+}
+
+.speed-option,
+.menu-option {
+    padding: 10px 16px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    color: var(--text-secondary);
+}
+
+.speed-option:hover,
+.menu-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.speed-option.active,
+.menu-option.active {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* Subtitle track styling */
+::cue {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-family: var(--font);
+    font-size: 1.1rem;
+    line-height: 1.4;
+    text-shadow: 0 1px 4px black;
+}
+
+/* Loading spinner */
+.player-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px;
+    height: 52px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.player-spinner::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.player-spinner.hidden {
+    display: none;
+}
+
+/* Error overlay */
+.player-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 15;
+    text-align: center;
+    padding: var(--space-xl);
+    display: none;
+}
+
+.player-error.visible {
+    display: flex;
+}
+
+.player-error-icon {
+    font-size: 48px;
+    opacity: 0.6;
+}
+
+.player-error-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+}
+
+.player-error-text {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Episode panel (slide up) */
+.player-ep-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 55vh;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    overflow-y: auto;
+    z-index: 30;
+    padding: var(--space-md);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.player-ep-panel.open {
+    transform: translateY(0);
+}
+
+.player-ep-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+
+.player-ep-panel-title {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+}
+
+.player-ep-panel-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-ep-panel-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Landscape mode overlay adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+    .player-top-bar {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .player-bottom-bar {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .player-ctrl-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .player-ctrl-btn.play-pause-btn {
+        width: 54px;
+        height: 54px;
+    }
+}
