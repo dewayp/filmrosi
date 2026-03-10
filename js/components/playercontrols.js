@@ -12,6 +12,8 @@ const PlayerControls = (() => {
     let playPauseBtn = null;
     let spinnerEl = null;
     let currentSpeed = 1;
+    let currentCcSize = '1.1rem';
+    let currentCcBg = 'rgba(0, 0, 0, 0.8)';
     let epPanelEl = null;
     let captionsMap = {}; // lang -> { url, blobUrl }
     let currentBlobUrls = []; // for cleanup
@@ -158,6 +160,26 @@ const PlayerControls = (() => {
         showControls(true);
     }
 
+    function setCcSize(size) {
+        currentCcSize = size;
+        document.documentElement.style.setProperty('--cc-size', size);
+        localStorage.setItem('mbr_cc_size', size);
+        document.querySelectorAll('.cc-size-opt').forEach(o => {
+            o.classList.toggle('active', o.dataset.val === size);
+        });
+        showControls(true);
+    }
+
+    function setCcBg(bg) {
+        currentCcBg = bg;
+        document.documentElement.style.setProperty('--cc-bg', bg);
+        localStorage.setItem('mbr_cc_bg', bg);
+        document.querySelectorAll('.cc-bg-opt').forEach(o => {
+            o.classList.toggle('active', o.dataset.val === bg);
+        });
+        showControls(true);
+    }
+
     async function setQuality(quality, rawUrl) {
         if (!videoEl) return;
 
@@ -277,12 +299,25 @@ const PlayerControls = (() => {
             }
         }
 
+        // Load Subtitle Preferences
+        const savedSize = localStorage.getItem('mbr_cc_size');
+        if (savedSize) {
+            currentCcSize = savedSize;
+            document.documentElement.style.setProperty('--cc-size', savedSize);
+        }
+        const savedBg = localStorage.getItem('mbr_cc_bg');
+        if (savedBg) {
+            currentCcBg = savedBg;
+            document.documentElement.style.setProperty('--cc-bg', savedBg);
+        }
+
         showControls(true);
     }
 
     return {
         init, togglePlayPause, rewind, forward,
         toggleMute, setSpeed, toggleMenu, setSubtitle, setQuality,
+        setCcSize, setCcBg,
         toggleFullscreen, showControls, SPEEDS, updatePlayBtn
     };
 })();

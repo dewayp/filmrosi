@@ -19,8 +19,11 @@ const STATIC_ASSETS = [
   './js/pages/home.js',
   './js/pages/trending.js',
   './js/pages/search.js',
+  './js/pages/section.js',
+  './js/pages/downloads.js',
   './js/pages/detail.js',
   './js/pages/player.js',
+  './js/downloads.js',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

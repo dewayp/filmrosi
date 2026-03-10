@@ -15,9 +15,19 @@ const PlayerPage = (() => {
       return;
     }
 
-    const { title, season, episode, subjectType, streamUrl, totalSeasons, totalEpisodes, captions, allSources } = playerState;
+    const { title, season, episode, subjectType, streamUrl, totalSeasons, totalEpisodes, captions, allSources, subjectId } = playerState;
     const isSeries = subjectType === 2 || subjectType === 7;
     const epLabel = isSeries ? `S${season} · E${episode}` : '';
+
+    // Check if offline url is available
+    let playUrl = streamUrl;
+    if (window.Downloads) {
+      const offlineUrl = await window.Downloads.getOfflineUrl(subjectId, season || 0, episode || 0);
+      if (offlineUrl) {
+        playUrl = offlineUrl;
+        Utils.showToast('Memutar versi unduhan (Offline)', 'info', 3000);
+      }
+    }
 
     // Build season episode map for panel
     const episodeMap = {};
@@ -38,11 +48,26 @@ const PlayerPage = (() => {
       `<track label="${c.lanName}" kind="subtitles" srclang="${c.lan}" src="${c.url}" ${c.lan === defaultLang ? 'default' : ''}>`
     ).join('\n');
 
+    const savedCcSize = localStorage.getItem('mbr_cc_size') || '1.1rem';
+    const savedCcBg = localStorage.getItem('mbr_cc_bg') || 'rgba(0, 0, 0, 0.8)';
+
     const ccOptions = `
       <div class="menu-option ${!defaultLang ? 'active' : ''}" data-cc="off" onclick="PlayerControls.setSubtitle('off')">Off</div>
       ${(captions || []).map(c =>
       `<div class="menu-option ${c.lan === defaultLang ? 'active' : ''}" data-cc="${c.lan}" onclick="PlayerControls.setSubtitle('${c.lan}')">${c.lanName}</div>`
     ).join('')}
+      <div class="popup-title" style="margin-top:8px;">Ukuran Teks</div>
+      <div class="menu-row">
+        <div class="menu-option cc-size-opt ${savedCcSize === '0.8rem' ? 'active' : ''}" data-val="0.8rem" onclick="PlayerControls.setCcSize('0.8rem')">Kecil</div>
+        <div class="menu-option cc-size-opt ${savedCcSize === '1.1rem' ? 'active' : ''}" data-val="1.1rem" onclick="PlayerControls.setCcSize('1.1rem')">Normal</div>
+        <div class="menu-option cc-size-opt ${savedCcSize === '1.4rem' ? 'active' : ''}" data-val="1.4rem" onclick="PlayerControls.setCcSize('1.4rem')">Besar</div>
+      </div>
+      <div class="popup-title">Latar Teks</div>
+      <div class="menu-row">
+        <div class="menu-option cc-bg-opt ${savedCcBg === 'transparent' ? 'active' : ''}" data-val="transparent" onclick="PlayerControls.setCcBg('transparent')">Off</div>
+        <div class="menu-option cc-bg-opt ${savedCcBg === 'rgba(0, 0, 0, 0.4)' ? 'active' : ''}" data-val="rgba(0, 0, 0, 0.4)" onclick="PlayerControls.setCcBg('rgba(0, 0, 0, 0.4)')">Rendah</div>
+        <div class="menu-option cc-bg-opt ${savedCcBg === 'rgba(0, 0, 0, 0.8)' ? 'active' : ''}" data-val="rgba(0, 0, 0, 0.8)" onclick="PlayerControls.setCcBg('rgba(0, 0, 0, 0.8)')">Gelap</div>
+      </div>
     `;
 
     const qtyOptions = (allSources || []).map(s =>
@@ -57,7 +82,7 @@ const PlayerPage = (() => {
             crossorigin="anonymous"
             class="player-video"
             id="player-video"
-            src="${streamUrl}"
+            src="${playUrl}"
             playsinline
             preload="auto"
             autoplay
@@ -238,18 +263,29 @@ const PlayerPage = (() => {
       const rawUrl = best.directUrl || best.url;
       if (!rawUrl) throw new Error('URL video tidak ditemukan');
 
+      let finalUrl = streamUrl;
       const genData = await API.generateStreamUrl(rawUrl);
       if (!genData.success || !genData.streamUrl) throw new Error(genData.message);
+      finalUrl = genData.streamUrl;
+
+      // Determine Offline status AFTER getting all the real URLs
+      if (window.Downloads) {
+        const offlineUrl = await window.Downloads.getOfflineUrl(playerState.subjectId, season, episode);
+        if (offlineUrl) {
+          finalUrl = offlineUrl;
+          Utils.showToast('Memutar versi unduhan (Offline)', 'info', 3000);
+        }
+      }
 
       playerState.season = season;
       playerState.episode = episode;
-      playerState.streamUrl = genData.streamUrl;
+      playerState.streamUrl = finalUrl; // store the real streamUrl in state even if offline replaces it below via videoEl
       playerState.allSources = dlList;
       playerState.captions = captions;
       State.set('player', playerState);
 
       if (videoEl) {
-        videoEl.src = genData.streamUrl;
+        videoEl.src = finalUrl;
         videoEl.play();
       }
 

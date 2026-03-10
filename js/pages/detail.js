@@ -11,6 +11,7 @@ const DetailPage = (() => {
 
   async function render(container, params = {}) {
     const subjectId = params.subjectId || Router.getQueryParam('id');
+    window.currentSubjectIdForEpisodeList = subjectId;
     if (!subjectId) {
       container.innerHTML = `<div class="empty-state"><p class="empty-state-title">Konten tidak ditemukan</p></div>`;
       return;
@@ -118,6 +119,9 @@ const DetailPage = (() => {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
                 Tonton
               </button>
+              <button class="btn btn-secondary btn-lg" id="download-btn-movie" onclick="DetailPage.downloadMovie()" style="border: 1px solid var(--border);">
+                ${getMovieDownloadButtonHtml(subjectId)}
+              </button>
             ` : `
               <button class="btn btn-primary btn-lg" id="play-btn" onclick="DetailPage.playEpisode(${activeSeason}, ${activeEpisode})">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
@@ -133,6 +137,11 @@ const DetailPage = (() => {
 
       // Add to watch history
       State.addToHistory(subject);
+
+      // Listen to download changes
+      window.addEventListener('mbr-download-started', handleDownloadUpdate);
+      window.addEventListener('mbr-download-completed', handleDownloadUpdate);
+      window.addEventListener('mbr-download-failed', handleDownloadUpdate);
 
     } catch (err) {
       console.error('Detail error:', err);
@@ -245,5 +254,134 @@ const DetailPage = (() => {
     }
   }
 
-  return { render, playMovie, playEpisode, changeSeason };
+  function getMovieDownloadButtonHtml(subjectId) {
+    if (!window.Downloads) return 'Download';
+    if (window.Downloads.isDownloaded(subjectId, 0, 0)) {
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Disimpan`;
+    }
+    if (window.Downloads.isDownloading(subjectId, 0, 0)) {
+      const dlItem = window.Downloads.getStoredDownloads().find(d => d.subjectId === subjectId && d.season === 0 && d.episode === 0);
+      const pct = dlItem && dlItem.progress > 0 ? ` ${dlItem.progress}%` : '';
+      return `<svg width="18" height="18" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Mengunduh${pct}`;
+    }
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Download`;
+  }
+
+  function handleDownloadUpdate() {
+    // If not detail page anymore, clean up listener
+    if (!document.getElementById('detail-page')) {
+      window.removeEventListener('mbr-download-started', handleDownloadUpdate);
+      window.removeEventListener('mbr-download-completed', handleDownloadUpdate);
+      window.removeEventListener('mbr-download-failed', handleDownloadUpdate);
+      window.removeEventListener('mbr-download-progress', handleDownloadProgress);
+      return;
+    }
+
+    if (!currentSubject) return;
+
+    const isMovie = Number(currentSubject.subjectType) === 1;
+    if (isMovie) {
+      const btn = document.getElementById('download-btn-movie');
+      if (btn) {
+        btn.innerHTML = getMovieDownloadButtonHtml(currentSubject.subjectId);
+      }
+    } else {
+      // Re-render episode grid
+      const epSection = document.getElementById('episode-section');
+      if (epSection) {
+        epSection.outerHTML = EpisodeList.createHTML(TOTAL_SEASONS, currentSeasonEpisodes, activeSeason, activeEpisode, false);
+      }
+    }
+  }
+
+  function handleDownloadProgress(e) {
+    if (!currentSubject || !document.getElementById('detail-page')) return;
+    const { id, percent } = e.detail;
+
+    const isMovie = Number(currentSubject.subjectType) === 1;
+    if (isMovie) {
+      // If it's this movie
+      if (id === `${currentSubject.subjectId}_S0E0`) {
+        const btn = document.getElementById('download-btn-movie');
+        if (btn) btn.innerHTML = `<svg width="18" height="18" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Mengunduh ${percent}%`;
+      }
+    } else {
+      // It's a series episode
+      // Locate the exact button because re-rendering whole grid will be too intensive
+      const match = id.match(/_S(\d+)E(\d+)$/);
+      if (match) {
+        const s = parseInt(match[1]);
+        const ep = parseInt(match[2]);
+        if (s === activeSeason) {
+          const btn = document.querySelector(`.ep-download-btn[data-season="${s}"][data-episode="${ep}"]`);
+          if (btn) {
+            btn.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg><span style="font-size:10px">${percent}%</span>`;
+          }
+        }
+      }
+    }
+  }
+
+  async function downloadMovie() {
+    if (!currentSubject) return;
+    if (window.Downloads.isDownloaded(currentSubject.subjectId, 0, 0) || window.Downloads.isDownloading(currentSubject.subjectId, 0, 0)) return;
+
+    try {
+      // First UI update via event will happen, but we need url.
+      // Let's get url first so we can show it's loading before starting real dl
+      const btn = document.getElementById('download-btn-movie');
+      if (btn) btn.innerHTML = `<svg width="18" height="18" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Bersiap...`;
+
+      const sourcesData = await API.getSources(currentSubject.subjectId, 0, 0);
+      const dlList = sourcesData.processedSources || sourcesData.downloads || [];
+      if (dlList.length === 0) throw new Error('Sumber video tidak tersedia');
+      const captions = sourcesData.captions || [];
+      const best = dlList[dlList.length - 1]; // highest quality
+      const rawUrl = best.directUrl || best.url;
+
+      // Generate true url
+      const genData = await API.generateStreamUrl(rawUrl);
+      if (!genData.success || !genData.streamUrl) throw new Error('Gagal mendapatkan url');
+
+      const formattedSize = genData.fileInfo?.sizeFormatted || 'Unknown Size';
+      const sizeBytes = genData.fileInfo?.size || 0;
+
+      // Start background download
+      Downloads.startDownload(currentSubject, 0, 0, genData.streamUrl, formattedSize, captions, sizeBytes);
+      Utils.showToast('Unduhan film dimulai', 'success');
+    } catch (err) {
+      Utils.showToast('Gagal memulai unduhan: ' + err.message, 'error');
+      handleDownloadUpdate(); // reset UI
+    }
+  }
+
+  async function downloadEpisode(season, episode) {
+    if (!currentSubject) return;
+    if (window.Downloads.isDownloaded(currentSubject.subjectId, season, episode) || window.Downloads.isDownloading(currentSubject.subjectId, season, episode)) return;
+
+    try {
+      Utils.showToast(`Menyiapkan unduhan S${season}E${episode}...`, 'info');
+
+      const sourcesData = await API.getSources(currentSubject.subjectId, season, episode);
+      const dlList = sourcesData.processedSources || sourcesData.downloads || [];
+      if (dlList.length === 0) throw new Error('Sumber video tidak tersedia');
+      const captions = sourcesData.captions || [];
+      const best = dlList[dlList.length - 1];
+      const rawUrl = best.directUrl || best.url;
+
+      const genData = await API.generateStreamUrl(rawUrl);
+      if (!genData.success || !genData.streamUrl) throw new Error('Gagal mendapatkan url');
+
+      const formattedSize = genData.fileInfo?.sizeFormatted || 'Unknown Size';
+      const sizeBytes = genData.fileInfo?.size || 0;
+
+      Downloads.startDownload(currentSubject, season, episode, genData.streamUrl, formattedSize, captions, sizeBytes);
+      Utils.showToast(`Unduhan episode ${episode} dimulai`, 'success');
+    } catch (err) {
+      Utils.showToast('Gagal memulai unduhan: ' + err.message, 'error');
+      handleDownloadUpdate();
+    }
+  }
+
+  return { render, playMovie, playEpisode, changeSeason, downloadMovie, downloadEpisode };
 })();

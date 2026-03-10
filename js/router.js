@@ -14,6 +14,7 @@ const Router = (() => {
         '/trending': TrendingPage.render,
         '/search': SearchPage.render,
         '/section': SectionPage.render,
+        '/downloads': DownloadsPage.render,
         '/detail': DetailPage.render,
         '/player': PlayerPage.render,
     };
