@@ -323,8 +323,17 @@ const DetailPage = (() => {
   }
 
   async function downloadMovie() {
+    Utils.showToast("Mempersiapkan unduhan...", "info");
     if (!currentSubject) return;
-    if (window.Downloads.isDownloaded(currentSubject.subjectId, 0, 0) || window.Downloads.isDownloading(currentSubject.subjectId, 0, 0)) return;
+    if (window.Downloads.isDownloaded(currentSubject.subjectId, 0, 0)) {
+      Utils.showToast("Film ini sudah disimpan", "info");
+      return;
+    }
+    if (window.Downloads.isDownloading(currentSubject.subjectId, 0, 0)) {
+      Utils.showToast("Peringatan: Unduhan macet, mengulangi...", "error");
+      window.Downloads.deleteDownload(currentSubject.subjectId, 0, 0);
+      // continue to let them download again
+    }
 
     try {
       // First UI update via event will happen, but we need url.
@@ -356,8 +365,16 @@ const DetailPage = (() => {
   }
 
   async function downloadEpisode(season, episode) {
+    Utils.showToast(`Mempersiapkan unduhan S${season}E${episode}...`, "info");
     if (!currentSubject) return;
-    if (window.Downloads.isDownloaded(currentSubject.subjectId, season, episode) || window.Downloads.isDownloading(currentSubject.subjectId, season, episode)) return;
+    if (window.Downloads.isDownloaded(currentSubject.subjectId, season, episode)) {
+      Utils.showToast("Episode ini sudah disimpan", "info");
+      return;
+    }
+    if (window.Downloads.isDownloading(currentSubject.subjectId, season, episode)) {
+      Utils.showToast("Peringatan: Unduhan macet, mengulangi...", "error");
+      window.Downloads.deleteDownload(currentSubject.subjectId, season, episode);
+    }
 
     try {
       Utils.showToast(`Menyiapkan unduhan S${season}E${episode}...`, 'info');
