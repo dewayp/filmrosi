@@ -194,9 +194,13 @@ const PlayerControls = (() => {
             if (!genData.success || !genData.streamUrl) throw new Error(genData.message);
 
             // Apply new source
-            videoEl.src = genData.streamUrl;
-            videoEl.currentTime = curTime;
-            if (wasPlaying) videoEl.play();
+            if (typeof PlayerPage !== 'undefined' && typeof PlayerPage.loadVideo === 'function') {
+                PlayerPage.loadVideo(genData.streamUrl, curTime, wasPlaying);
+            } else {
+                videoEl.src = genData.streamUrl;
+                videoEl.currentTime = curTime;
+                if (wasPlaying) videoEl.play();
+            }
 
             // Update UI
             document.querySelectorAll('#qty-popup .menu-option').forEach(o => {

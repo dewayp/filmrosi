@@ -6,6 +6,7 @@ const PlayerPage = (() => {
   let playerState = null;
   let videoEl = null;
   let epPanelOpen = false;
+  let hlsInstance = null;
 
   async function render(container) {
     playerState = State.get('player');
@@ -79,13 +80,10 @@ const PlayerPage = (() => {
         <!-- Video -->
         <div class="player-video-wrap">
           <video
-            crossorigin="anonymous"
             class="player-video"
             id="player-video"
-            src="${playUrl}"
             playsinline
-            preload="auto"
-            autoplay
+            preload="metadata"
           >
           </video>
 
@@ -228,14 +226,71 @@ const PlayerPage = (() => {
     if (videoEl && overlay) {
       PlayerControls.init(videoEl, overlay);
     }
+    if (videoEl && playUrl) {
+      loadVideo(playUrl);
+    }
   }
 
   function exitPlayer() {
     if (videoEl) {
       videoEl.pause();
-      videoEl.src = '';
+      videoEl.removeAttribute('src');
+      videoEl.load();
+    }
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
     }
     Router.back();
+  }
+
+  function loadVideo(url, startCurrentTime = 0, autoPlay = true) {
+    if (!videoEl) return;
+
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
+    }
+
+    const spinner = document.getElementById('player-spinner');
+    if (spinner) spinner.classList.remove('hidden');
+
+    if (url.includes('.m3u8') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+      hlsInstance = new Hls({
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+      });
+
+      hlsInstance.loadSource(url);
+      hlsInstance.attachMedia(videoEl);
+
+      hlsInstance.on(Hls.Events.MANIFEST_PARSED, function () {
+        if (startCurrentTime > 0) videoEl.currentTime = startCurrentTime;
+        if (autoPlay) videoEl.play().catch(e => console.log('Autoplay prevented', e));
+        if (spinner) spinner.classList.add('hidden');
+      });
+
+      hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            hlsInstance.startLoad();
+          } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            hlsInstance.recoverMediaError();
+          } else {
+            hlsInstance.destroy();
+          }
+        }
+      });
+    } else {
+      videoEl.src = url;
+      if (startCurrentTime > 0) {
+        videoEl.currentTime = startCurrentTime;
+      }
+      if (autoPlay) {
+        videoEl.play().catch(e => console.log('Autoplay prevented', e));
+      }
+      if (spinner) spinner.classList.add('hidden');
+    }
   }
 
   function toggleEpPanel() {
@@ -285,8 +340,7 @@ const PlayerPage = (() => {
       State.set('player', playerState);
 
       if (videoEl) {
-        videoEl.src = finalUrl;
-        videoEl.play();
+        loadVideo(finalUrl);
       }
 
       // Update title bar
@@ -333,5 +387,5 @@ const PlayerPage = (() => {
     switchEpisode(playerState.season || 1, prevEp);
   }
 
-  return { render, exitPlayer, toggleEpPanel, switchEpisode, changeSeason, nextEpisode, prevEpisode };
+  return { render, exitPlayer, toggleEpPanel, switchEpisode, changeSeason, nextEpisode, prevEpisode, loadVideo };
 })();
