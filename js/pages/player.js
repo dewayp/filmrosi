@@ -62,7 +62,6 @@ const PlayerPage = (() => {
             preload="auto"
             autoplay
           >
-            ${tracksHtml}
           </video>
 
           <!-- Loading Spinner -->

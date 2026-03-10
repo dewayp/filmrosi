@@ -356,6 +356,7 @@ a {
     padding-top: var(--header-height);
     padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom));
     min-height: 100dvh;
+    width: 100%;
 }
 
 .router-outlet.player-mode {
@@ -825,10 +826,12 @@ a {
     .router-outlet {
         padding-left: 240px;
         padding-bottom: 0;
+        width: 100%;
     }
 
     .app-header {
         left: 240px;
+        width: calc(100% - 240px);
         padding-inline: var(--space-xl);
     }
 }

@@ -13,6 +13,7 @@ const Router = (() => {
         '/': HomPage.render,
         '/trending': TrendingPage.render,
         '/search': SearchPage.render,
+        '/section': SectionPage.render,
         '/detail': DetailPage.render,
         '/player': PlayerPage.render,
     };
@@ -45,15 +46,29 @@ const Router = (() => {
     }
 
     function parseRoute(hash) {
-        // hash = "#/detail" or "#/player" etc.
-        const path = hash.replace(/^#/, '') || '/';
+        // hash = "#/detail" or "#/search?q=XXX" etc.
+        let path = hash.replace(/^#/, '') || '/';
+        const params = {};
+
+        // Extract hash query params (e.g., #/search?q=Trending)
+        const queryIndex = path.indexOf('?');
+        if (queryIndex !== -1) {
+            const queryStr = path.substring(queryIndex + 1);
+            path = path.substring(0, queryIndex);
+
+            const urlParams = new URLSearchParams(queryStr);
+            for (const [key, value] of urlParams) {
+                params[key] = value;
+            }
+        }
+
         // Match exact or prefix
         for (const route of Object.keys(PAGE_RENDERERS)) {
             if (path === route || (route !== '/' && path.startsWith(route))) {
-                return { route, path };
+                return { route, path, hashParams: params };
             }
         }
-        return { route: '/', path: '/' };
+        return { route: '/', path: '/', hashParams: params };
     }
 
     function setPlayerMode(on) {
@@ -85,7 +100,7 @@ const Router = (() => {
     }
 
     async function render(hash) {
-        const { route } = parseRoute(hash);
+        const { route, hashParams } = parseRoute(hash);
         currentRoute = route;
 
         const ro = outlet();
@@ -96,7 +111,7 @@ const Router = (() => {
 
         // Player mode
         setPlayerMode(route === '/player');
-        setDetailMode(route === '/detail' || route === '/player');
+        setDetailMode(route === '/detail' || route === '/player' || route === '/section');
 
         // Update nav active
         Utils.setActiveNav(route);
@@ -104,10 +119,13 @@ const Router = (() => {
         // Header scroll behavior
         header()?.classList.remove('transparent');
 
+        // Combine hash params (...?q=abc) with session storage params
+        const combinedParams = { ...getRouteParams(), ...hashParams };
+
         // Render page
         const renderer = PAGE_RENDERERS[route];
         if (renderer) {
-            await renderer(ro, getRouteParams());
+            await renderer(ro, combinedParams);
         } else {
             ro.innerHTML = '<div class="empty-state"><p class="empty-state-title">Halaman tidak ditemukan</p></div>';
         }

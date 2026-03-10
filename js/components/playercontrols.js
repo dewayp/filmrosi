@@ -13,6 +13,8 @@ const PlayerControls = (() => {
     let spinnerEl = null;
     let currentSpeed = 1;
     let epPanelEl = null;
+    let captionsMap = {}; // lang -> { url, blobUrl }
+    let currentBlobUrls = []; // for cleanup
 
     const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
     const SEEK_SECONDS = 15;
@@ -95,17 +97,64 @@ const PlayerControls = (() => {
         });
     }
 
-    function setSubtitle(lang) {
+    async function setSubtitle(lang) {
         if (!videoEl) return;
-        const tracks = videoEl.textTracks;
-        for (let i = 0; i < tracks.length; i++) {
-            tracks[i].mode = (tracks[i].language === lang) ? 'showing' : 'hidden';
+
+        // Remove existing injected tracks
+        videoEl.querySelectorAll('track[data-injected]').forEach(t => t.remove());
+        currentBlobUrls.forEach(u => URL.revokeObjectURL(u));
+        currentBlobUrls = [];
+
+        // Hide all existing text tracks
+        for (let i = 0; i < videoEl.textTracks.length; i++) {
+            videoEl.textTracks[i].mode = 'hidden';
         }
 
         document.querySelectorAll('#cc-popup .menu-option').forEach(o => {
             o.classList.toggle('active', o.dataset.cc === lang);
         });
         toggleMenu('cc-popup');
+
+        if (lang === 'off') {
+            showControls(true);
+            return;
+        }
+
+        const cap = captionsMap[lang];
+        if (!cap) { showControls(true); return; }
+
+        try {
+            // Fetch and convert if we don't have a blob yet
+            if (!cap.blobUrl) {
+                cap.blobUrl = await Utils.fetchSubtitleBlob(cap.url);
+                if (!cap.blobUrl) throw new Error('Failed to fetch subtitle');
+            }
+
+            currentBlobUrls.push(cap.blobUrl);
+
+            // Inject new <track> element with Blob URL
+            const track = document.createElement('track');
+            track.kind = 'subtitles';
+            track.srclang = lang;
+            track.src = cap.blobUrl;
+            track.label = cap.lanName;
+            track.default = true;
+            track.setAttribute('data-injected', '1');
+            videoEl.appendChild(track);
+
+            // Activate it after a short delay (browser needs time to parse VTT)
+            setTimeout(() => {
+                for (let i = 0; i < videoEl.textTracks.length; i++) {
+                    if (videoEl.textTracks[i].language === lang) {
+                        videoEl.textTracks[i].mode = 'showing';
+                    }
+                }
+            }, 150);
+
+        } catch (err) {
+            Utils.showToast('Gagal memuat subtitle: ' + err.message, 'error');
+        }
+
         showControls(true);
     }
 
@@ -210,13 +259,22 @@ const PlayerControls = (() => {
             }
         });
 
-        // Subtitles default enable
-        if (video.textTracks && video.textTracks.length > 0) {
-            const state = State.get('player');
-            const defaultLang = state?.captions?.some(c => c.lan === 'in_id') ? 'in_id' :
-                state?.captions?.some(c => c.lan === 'en') ? 'en' :
-                    state?.captions?.[0]?.lan;
-            if (defaultLang) setSubtitle(defaultLang);
+        // Build captions map from player state
+        const state = State.get('player');
+        if (state?.captions?.length > 0) {
+            captionsMap = {};
+            state.captions.forEach(c => {
+                captionsMap[c.lan] = { url: c.url, lanName: c.lanName, blobUrl: null };
+            });
+
+            // Auto-select default subtitle (Indonesian > English > first available)
+            const defaultLang = state.captions.some(c => c.lan === 'in_id') ? 'in_id' :
+                state.captions.some(c => c.lan === 'en') ? 'en' :
+                    state.captions[0]?.lan;
+            if (defaultLang) {
+                // Auto-select after a slight delay
+                setTimeout(() => setSubtitle(defaultLang), 500);
+            }
         }
 
         showControls(true);

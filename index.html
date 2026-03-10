@@ -1,135 +1,147 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0f">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MBRosi">
-  <meta name="description" content="MOVIEBOX ROSI — Streaming film dan serial favoritmu, kapan saja, di mana saja.">
-  <title>MOVIEBOX ROSI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MBRosi">
+    <meta name="description" content="MOVIEBOX ROSI — Streaming film dan serial favoritmu, kapan saja, di mana saja.">
+    <title>MOVIEBOX ROSI</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/player.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/player.css">
 </head>
+
 <body>
 
-  <!-- Splash / Loading Overlay -->
-  <div id="app-splash" class="splash-screen">
-    <div class="splash-logo">
-      <div class="splash-icon">
-        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="60" height="60" rx="14" fill="#e50914"/>
-          <path d="M12 18L24 30L12 42V18Z" fill="white"/>
-          <path d="M24 18L36 30L24 42V18Z" fill="rgba(255,255,255,0.7)"/>
-          <path d="M36 18L48 30L36 42V18Z" fill="rgba(255,255,255,0.4)"/>
-        </svg>
-      </div>
-      <div class="splash-brand">
-        <span class="splash-brand-movie">MOVIE</span><span class="splash-brand-box">BOX</span>
-        <div class="splash-brand-rosi">ROSI</div>
-      </div>
-    </div>
-    <div class="splash-loader">
-      <div class="splash-bar"></div>
-    </div>
-  </div>
-
-  <!-- Main App Shell -->
-  <div id="app" class="app-shell" style="display:none;">
-
-    <!-- Top Header (shown on most pages) -->
-    <header id="app-header" class="app-header">
-      <div class="header-left">
-        <button id="btn-back" class="btn-back" onclick="Router.back()" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <div class="header-logo" id="header-logo">
-          <span class="logo-movie">MOVIE</span><span class="logo-box">BOX</span><span class="logo-rosi">ROSI</span>
+    <!-- Splash / Loading Overlay -->
+    <div id="app-splash" class="splash-screen">
+        <div class="splash-logo">
+            <div class="splash-icon">
+                <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="60" height="60" rx="14" fill="#e50914" />
+                    <path d="M12 18L24 30L12 42V18Z" fill="white" />
+                    <path d="M24 18L36 30L24 42V18Z" fill="rgba(255,255,255,0.7)" />
+                    <path d="M36 18L48 30L36 42V18Z" fill="rgba(255,255,255,0.4)" />
+                </svg>
+            </div>
+            <div class="splash-brand">
+                <span class="splash-brand-movie">MOVIE</span><span class="splash-brand-box">BOX</span>
+                <div class="splash-brand-rosi">ROSI</div>
+            </div>
         </div>
-      </div>
-      <div class="header-right">
-        <button class="header-search-btn" onclick="Router.navigate('/search')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </button>
-      </div>
-    </header>
+        <div class="splash-loader">
+            <div class="splash-bar"></div>
+        </div>
+    </div>
 
-    <!-- Router Outlet -->
-    <main id="router-outlet" class="router-outlet"></main>
+    <!-- Main App Shell -->
+    <div id="app" class="app-shell" style="display:none;">
 
-    <!-- Bottom Navigation -->
-    <nav id="bottom-nav" class="bottom-nav">
-      <button class="nav-item" data-route="/" onclick="Router.navigate('/')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-        </svg>
-        <span class="nav-label">Beranda</span>
-      </button>
-      <button class="nav-item" data-route="/trending" onclick="Router.navigate('/trending')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
-          <path d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
-        </svg>
-        <span class="nav-label">Trending</span>
-      </button>
-      <button class="nav-item" data-route="/search" onclick="Router.navigate('/search')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <span class="nav-label">Cari</span>
-      </button>
-    </nav>
+        <!-- Top Header (shown on most pages) -->
+        <header id="app-header" class="app-header">
+            <div class="header-left">
+                <button id="btn-back" class="btn-back" onclick="Router.back()" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </button>
+                <div class="header-logo" id="header-logo">
+                    <span class="logo-movie">MOVIE</span><span class="logo-box">BOX</span><span
+                        class="logo-rosi">ROSI</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-search-btn" onclick="Router.navigate('/search')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </button>
+            </div>
+        </header>
 
-  </div>
+        <!-- Router Outlet -->
+        <main id="router-outlet" class="router-outlet"></main>
 
-  <!-- Toast Notification -->
-  <div id="toast-container" class="toast-container"></div>
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav" class="bottom-nav">
+            <button class="nav-item" data-route="/" onclick="Router.navigate('/')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+                <span class="nav-label">Beranda</span>
+            </button>
+            <button class="nav-item" data-route="/trending" onclick="Router.navigate('/trending')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                    <path d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+                </svg>
+                <span class="nav-label">Trending</span>
+            </button>
+            <button class="nav-item" data-route="/search" onclick="Router.navigate('/search')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <span class="nav-label">Cari</span>
+            </button>
+        </nav>
 
-  <!-- JS Modules (order matters) -->
-  <script src="js/utils.js"></script>
-  <script src="js/cache.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/components/card.js"></script>
-  <script src="js/components/section.js"></script>
-  <script src="js/components/hero.js"></script>
-  <script src="js/components/episodelist.js"></script>
-  <script src="js/components/playercontrols.js"></script>
-  <script src="js/pages/home.js"></script>
-  <script src="js/pages/trending.js"></script>
-  <script src="js/pages/search.js"></script>
-  <script src="js/pages/detail.js"></script>
-  <script src="js/pages/player.js"></script>
-  <script src="js/router.js"></script>
+    </div>
 
-  <script>
-    // Register Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(console.error);
-    }
+    <!-- Toast Notification -->
+    <div id="toast-container" class="toast-container"></div>
 
-    // Init app after DOM ready
-    document.addEventListener('DOMContentLoaded', () => {
-      // Init router (will render first view)
-      Router.init();
-    });
-  </script>
+    <!-- JS Modules (order matters) -->
+    <script src="js/utils.js"></script>
+    <script src="js/cache.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/components/card.js"></script>
+    <script src="js/components/section.js"></script>
+    <script src="js/components/hero.js"></script>
+    <script src="js/components/episodelist.js"></script>
+    <script src="js/components/playercontrols.js"></script>
+    <script src="js/pages/home.js"></script>
+    <script src="js/pages/trending.js"></script>
+    <script src="js/pages/search.js"></script>
+    <script src="js/pages/section.js"></script>
+    <script src="js/pages/detail.js"></script>
+    <script src="js/pages/player.js"></script>
+    <script src="js/router.js"></script>
+
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(console.error);
+        }
+
+        // Init app after DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Init router (will render first view)
+            Router.init();
+        });
+    </script>
 </body>
+
 </html>

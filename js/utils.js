@@ -139,9 +139,50 @@ const Utils = (() => {
         });
     }
 
+    /** Convert SRT subtitle text to WebVTT format */
+    function srtToVtt(srtText) {
+        // SRT uses commas for milliseconds: 00:00:01,000 → VTT uses dots: 00:00:01.000
+        const vtt = 'WEBVTT\n\n' + srtText
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n')
+            .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2')
+            .trim();
+        return vtt;
+    }
+
+    /**
+     * Fetch a subtitle .srt file via the API proxy and return a Blob URL (WebVTT)
+     * Falls back to direct fetch if proxy not needed or fails.
+     */
+    async function fetchSubtitleBlob(srtUrl) {
+        try {
+            // Use the API proxy endpoint to bypass CORS
+            const proxyUrl = `https://api.sansekai.my.id/api/moviebox/proxy-subtitle?url=${encodeURIComponent(srtUrl)}`;
+            let res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error('proxy failed');
+            const text = await res.text();
+            const vttText = srtToVtt(text);
+            const blob = new Blob([vttText], { type: 'text/vtt' });
+            return URL.createObjectURL(blob);
+        } catch (_) {
+            // Direct fallback
+            try {
+                const res = await fetch(srtUrl, { mode: 'cors' });
+                const text = await res.text();
+                const vttText = srtToVtt(text);
+                const blob = new Blob([vttText], { type: 'text/vtt' });
+                return URL.createObjectURL(blob);
+            } catch (err) {
+                console.warn('Subtitle fetch failed:', err.message);
+                return null;
+            }
+        }
+    }
+
     return {
         formatDuration, formatDate, formatYear, formatTime,
         getTypeBadge, showSkeletons, showToast, debounce,
-        lazyLoad, genreTags, imgFallback, setActiveNav
+        lazyLoad, genreTags, imgFallback, setActiveNav,
+        srtToVtt, fetchSubtitleBlob
     };
 })();
